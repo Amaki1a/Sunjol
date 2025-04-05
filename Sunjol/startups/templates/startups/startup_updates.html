@@ -1,0 +1,100 @@
+{% extends 'startups/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Обновления {{ startup.name }}</h6>
+                    {% if user == startup.founder %}
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUpdateModal">
+                        <i class="fas fa-plus"></i> Добавить обновление
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="timeline timeline-one-side">
+                        {% for update in updates %}
+                        <div class="timeline-block mb-3">
+                            <span class="timeline-step">
+                                <i class="fas fa-bell text-info"></i>
+                            </span>
+                            <div class="timeline-content">
+                                <h6 class="text-dark text-sm font-weight-bold mb-0">
+                                    {{ update.created_at|date:"d.m.Y H:i" }}
+                                </h6>
+                                <p class="text-sm text-secondary mb-0">
+                                    {{ update.content|linebreaks }}
+                                </p>
+                                {% if user == startup.founder %}
+                                <div class="mt-2">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteUpdate('{{ update.id }}')">
+                                        <i class="fas fa-trash"></i> Удалить
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <p class="text-secondary">Пока нет обновлений</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления обновления -->
+<div class="modal fade" id="addUpdateModal" tabindex="-1" aria-labelledby="addUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUpdateModalLabel">Добавить обновление</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Текст обновления</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                        <div class="form-text">Расскажите о последних достижениях и изменениях в вашем стартапе</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Опубликовать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteUpdate(updateId) {
+    if (confirm('Вы уверены, что хотите удалить это обновление?')) {
+        fetch(`/startup/{{ startup.id }}/update/${updateId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка при удалении обновления');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

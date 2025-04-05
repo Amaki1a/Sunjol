@@ -1,0 +1,53 @@
+{% extends 'startups/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Investor Dashboard</h1>
+            <p class="lead">Welcome back, {{ investor.user.username }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Investor Profile</h5>
+                    <p class="card-text">{{ investor.bio|default:"No bio provided" }}</p>
+                    <p class="card-text"><strong>Focus:</strong> {{ investor.investment_focus|default:"Not specified" }}</p>
+                    <p class="card-text"><strong>Industries:</strong> {{ investor.preferred_industries|default:"Not specified" }}</p>
+                    <a href="{% url 'investor_profile' %}" class="btn btn-primary btn-sm">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Your Investments</h5>
+                </div>
+                <div class="card-body">
+                    {% if investments %}
+                        <div class="list-group">
+                            {% for investment in investments %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ investment.startup.name }}</h6>
+                                    <small class="text-muted">{{ investment.date_invested|date:"M d, Y" }}</small>
+                                </div>
+                                <p class="mb-1">${{ investment.amount }}</p>
+                                <small class="text-muted">{{ investment.startup.get_industry_display }} • {{ investment.startup.get_stage_display }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">You haven't made any investments yet.</p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">Browse Startups</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

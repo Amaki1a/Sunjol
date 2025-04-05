@@ -1,0 +1,162 @@
+{% extends 'startups/base.html' %}
+
+{% block title %}Рейтинги и отзывы - {{ startup.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.5rem;
+    }
+    .review-card {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .review-user {
+        font-weight: bold;
+    }
+    .review-date {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    .verification-badge {
+        color: #28a745;
+        margin-left: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Рейтинги и отзывы</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Оставить оценку</h3>
+            <form id="ratingForm">
+                <div class="form-group">
+                    <label for="rating">Ваша оценка:</label>
+                    <select class="form-control" id="rating" name="rating">
+                        <option value="1">1 звезда</option>
+                        <option value="2">2 звезды</option>
+                        <option value="3">3 звезды</option>
+                        <option value="4">4 звезды</option>
+                        <option value="5">5 звезд</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Отправить оценку</button>
+            </form>
+        </div>
+        
+        <div class="col-md-6">
+            <h3>Написать отзыв</h3>
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="content">Ваш отзыв:</label>
+                    <textarea class="form-control" id="content" name="content" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Опубликовать отзыв</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h3>Отзывы пользователей</h3>
+        <div id="reviewsList">
+            {% for review in startup.reviews.all %}
+            <div class="review-card">
+                <div class="review-header">
+                    <div>
+                        <span class="review-user">{{ review.user.username }}</span>
+                        {% if review.user.verification.is_verified %}
+                        <i class="fas fa-check-circle verification-badge"></i>
+                        {% endif %}
+                    </div>
+                    <div class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+                <div class="rating-stars">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= review.rating.rating %}
+                            <i class="fas fa-star"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p class="mt-2">{{ review.content }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('ratingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch(`/startup/{{ startup.id }}/rating/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Оценка успешно добавлена!');
+            } else {
+                alert('Ошибка при добавлении оценки');
+            }
+        });
+    });
+
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch(`/startup/{{ startup.id }}/review/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const reviewsList = document.getElementById('reviewsList');
+                const newReview = document.createElement('div');
+                newReview.className = 'review-card';
+                newReview.innerHTML = `
+                    <div class="review-header">
+                        <div>
+                            <span class="review-user">{{ user.username }}</span>
+                            {% if user.verification.is_verified %}
+                            <i class="fas fa-check-circle verification-badge"></i>
+                            {% endif %}
+                        </div>
+                        <div class="review-date">${new Date().toLocaleString()}</div>
+                    </div>
+                    <p>${data.review.content}</p>
+                `;
+                reviewsList.prepend(newReview);
+                this.reset();
+            } else {
+                alert('Ошибка при публикации отзыва');
+            }
+        });
+    });
+</script>
+{% endblock %} 

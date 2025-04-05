@@ -1,0 +1,107 @@
+{% extends 'startups/base.html' %}
+
+{% block title %}Достижения{% endblock %}
+
+{% block extra_css %}
+<style>
+    .achievement-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: transform 0.3s;
+    }
+    .achievement-card:hover {
+        transform: translateY(-5px);
+    }
+    .achievement-icon {
+        font-size: 2rem;
+        color: #00ff9d;
+        margin-bottom: 10px;
+    }
+    .achievement-points {
+        color: #ffd700;
+        font-weight: bold;
+    }
+    .leaderboard-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+    }
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .leaderboard-rank {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-right: 15px;
+        color: #00ff9d;
+    }
+    .total-points {
+        font-size: 2.5rem;
+        color: #ffd700;
+        text-align: center;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Ваши достижения</h2>
+    
+    <div class="total-points">
+        <div>Всего очков</div>
+        <div>{{ total_points }}</div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                {% for achievement in achievements %}
+                <div class="col-md-6">
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="bi {{ achievement.icon }}"></i>
+                        </div>
+                        <h4>{{ achievement.title }}</h4>
+                        <p>{{ achievement.description }}</p>
+                        <div class="achievement-points">
+                            <i class="bi bi-star-fill"></i> {{ achievement.points }} очков
+                        </div>
+                        <small class="text-muted">Получено: {{ achievement.created_at|date:"d.m.Y" }}</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="achievement-card text-center">
+                        <h4>У вас пока нет достижений</h4>
+                        <p>Продолжайте развивать свой стартап, чтобы получать достижения и очки!</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="leaderboard-card">
+                <h3>Таблица лидеров</h3>
+                {% for entry in leaderboard %}
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">#{{ forloop.counter }}</div>
+                    <div>
+                        <div>{{ entry.user.username }}</div>
+                        <small class="text-muted">{{ entry.points }} очков</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,77 @@
+{% extends 'startups/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card startup-detail">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="card-title mb-0">{{ startup.name }}</h2>
+                    {% if user == startup.founder %}
+                    <div class="btn-group">
+                        <a href="{% url 'startup_edit' startup.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Редактировать
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="startup-info">
+                        <div class="mb-4">
+                            <h5 class="neon-text">Описание</h5>
+                            <p class="card-text">{{ startup.description }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="neon-text">Сфера деятельности</h5>
+                            <p class="card-text">{{ startup.industry }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="neon-text">Требуемые инвестиции</h5>
+                            <p class="card-text">{{ startup.required_investment }} ₽</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="neon-text">Текущая стадия</h5>
+                            <p class="card-text">{{ startup.get_stage_display }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="neon-text">Создатель</h5>
+                            <p class="card-text">
+                                {% if startup.founder and startup.founder.username %}
+                                    <a href="{% url 'user_profile' username=startup.founder.username %}" class="text-decoration-none">
+                                        {{ startup.founder.username }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Неизвестный пользователь</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="neon-text">Дата создания</h5>
+                            <p class="card-text">{{ startup.created_at|date:"d.m.Y" }}</p>
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated and user != startup.founder %}
+                    <div class="mt-4">
+                        <h5 class="neon-text">Инвестировать</h5>
+                        <form method="post" action="{% url 'invest_in_startup' startup.id %}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="number" name="amount" class="form-control" placeholder="Сумма инвестиции" required>
+                                <button type="submit" class="btn btn-primary">Инвестировать</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

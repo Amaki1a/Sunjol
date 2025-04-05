@@ -1,0 +1,132 @@
+{% extends 'startups/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6>Вехи {{ startup.name }}</h6>
+                    {% if user == startup.founder %}
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addMilestoneModal">
+                        <i class="fas fa-plus"></i> Добавить веху
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="timeline timeline-one-side">
+                        {% for milestone in milestones %}
+                        <div class="timeline-block mb-3">
+                            <span class="timeline-step">
+                                {% if milestone.completed %}
+                                <i class="fas fa-check text-success"></i>
+                                {% else %}
+                                <i class="fas fa-flag text-warning"></i>
+                                {% endif %}
+                            </span>
+                            <div class="timeline-content">
+                                <h6 class="text-dark text-sm font-weight-bold mb-0">{{ milestone.title }}</h6>
+                                <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">
+                                    Срок: {{ milestone.due_date|date:"d.m.Y" }}
+                                </p>
+                                <p class="text-sm text-secondary mb-0">
+                                    {{ milestone.description }}
+                                </p>
+                                {% if user == startup.founder %}
+                                <div class="mt-2">
+                                    {% if not milestone.completed %}
+                                    <button class="btn btn-success btn-sm" onclick="completeMilestone('{{ milestone.id }}')">
+                                        <i class="fas fa-check"></i> Завершить
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger btn-sm" onclick="deleteMilestone('{{ milestone.id }}')">
+                                        <i class="fas fa-trash"></i> Удалить
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления вехи -->
+<div class="modal fade" id="addMilestoneModal" tabindex="-1" aria-labelledby="addMilestoneModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMilestoneModalLabel">Добавить веху</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label">Срок выполнения</label>
+                        <input type="date" class="form-control" id="due_date" name="due_date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function completeMilestone(milestoneId) {
+    if (confirm('Вы уверены, что хотите отметить эту веху как выполненную?')) {
+        fetch(`/startup/{{ startup.id }}/milestone/${milestoneId}/complete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка при обновлении вехи');
+            }
+        });
+    }
+}
+
+function deleteMilestone(milestoneId) {
+    if (confirm('Вы уверены, что хотите удалить эту веху?')) {
+        fetch(`/startup/{{ startup.id }}/milestone/${milestoneId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка при удалении вехи');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

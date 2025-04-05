@@ -1,0 +1,111 @@
+{% extends 'startups/base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row align-items-center min-vh-75 py-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 neon-text mb-4">Launch Your Startup into Orbit</h1>
+            <p class="lead purple-neon-text mb-4">Connect with investors, build your team, and make your startup dreams a reality.</p>
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="{% url 'create_startup' %}" class="btn btn-lg">
+                    <i class="bi bi-rocket-takeoff"></i> Launch Your Startup
+                </a>
+                <a href="{% url 'startup_list' %}" class="btn btn-lg">
+                    <i class="bi bi-search"></i> Explore Startups
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-rocket display-1 neon-text"></i>
+                    <h3 class="neon-text mt-3">Join the Space Race</h3>
+                    <p class="purple-neon-text">Be part of the next generation of innovative startups.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row py-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="neon-text">Why Choose Sunjol?</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-lightning-charge display-4 neon-text"></i>
+                    <h3 class="neon-text mt-3">Fast Launch</h3>
+                    <p class="purple-neon-text">Get your startup up and running in minutes.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 neon-text"></i>
+                    <h3 class="neon-text mt-3">Find Talent</h3>
+                    <p class="purple-neon-text">Connect with skilled professionals for your team.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up display-4 neon-text"></i>
+                    <h3 class="neon-text mt-3">Grow Fast</h3>
+                    <p class="purple-neon-text">Access resources and guidance to scale your startup.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Startups Section -->
+    <div class="row py-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="neon-text">Latest Startups</h2>
+        </div>
+        {% for startup in latest_startups %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title neon-text">{{ startup.name }}</h5>
+                    <h6 class="card-subtitle mb-2 purple-neon-text">
+                        {{ startup.get_industry_display }} • {{ startup.get_stage_display }}
+                    </h6>
+                    <p class="card-text text-truncate">{{ startup.description }}</p>
+                    
+                    <div class="progress mb-3" style="height: 10px; background-color: var(--space-blue);">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ startup.funding_percentage }}%; background-color: var(--neon-blue);" 
+                             aria-valuenow="{{ startup.funding_percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <small class="purple-neon-text">
+                            ${{ startup.current_funding }} raised
+                        </small>
+                        <small class="purple-neon-text">
+                            ${{ startup.funding_goal }} goal
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="#" class="btn btn-sm">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert pixel-border">
+                <i class="bi bi-info-circle"></i> No startups available yet.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

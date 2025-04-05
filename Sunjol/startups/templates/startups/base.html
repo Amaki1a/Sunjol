@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sunjol{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --space-color: #0a0a2a;
+            --neon-blue: #00f3ff;
+            --neon-purple: #ff00ff;
+            --pixel-border: 2px solid #00f3ff;
+        }
+
+        body {
+            background-color: var(--space-color);
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .navbar {
+            background-color: var(--space-color) !important;
+            border-bottom: var(--pixel-border);
+            padding: 1rem;
+        }
+
+        .navbar-brand {
+            color: var(--neon-blue) !important;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .nav-link {
+            color: #fff !important;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--neon-blue) !important;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--neon-blue);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn {
+            background-color: transparent;
+            border: var(--pixel-border);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--neon-blue);
+            color: var(--space-color);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .card {
+            background-color: rgba(10, 10, 42, 0.8);
+            border: var(--pixel-border);
+            border-radius: 0;
+            margin-bottom: 2rem;
+        }
+
+        .neon-text {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .purple-neon-text {
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        .pixel-border {
+            border: var(--pixel-border);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .dropdown-menu {
+            background-color: var(--space-color);
+            border: var(--pixel-border);
+        }
+
+        .dropdown-item {
+            color: #fff;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--neon-blue);
+            color: var(--space-color);
+        }
+
+        .badge {
+            background-color: var(--neon-purple);
+            color: var(--space-color);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">Sunjol</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'startup_list' %}">
+                            <i class="bi bi-rocket"></i> Стартапы
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="startupDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-briefcase"></i> Управление Стартапом
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'create_startup' %}">
+                                <i class="bi bi-plus-circle"></i> Создать Стартап
+                            </a></li>
+                            {% if user_startup %}
+                            <li><a class="dropdown-item" href="{% url 'startup_dashboard' pk=user_startup.id %}">
+                                <i class="bi bi-speedometer2"></i> Панель Управления
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'startup_analytics' pk=user_startup.id %}">
+                                <i class="bi bi-graph-up"></i> Аналитика
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'startup_team' pk=user_startup.id %}">
+                                <i class="bi bi-people"></i> Команда
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'startup_milestones' pk=user_startup.id %}">
+                                <i class="bi bi-flag"></i> Вехи
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'startup_documents' pk=user_startup.id %}">
+                                <i class="bi bi-file-earmark"></i> Документы
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'startup_updates' pk=user_startup.id %}">
+                                <i class="bi bi-bell"></i> Обновления
+                            </a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="investorDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-cash-stack"></i> Инвестиции
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'investor_dashboard' %}">
+                                <i class="bi bi-wallet2"></i> Мои Инвестиции
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'investment_history' %}">
+                                <i class="bi bi-clock-history"></i> История
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'investment_portfolio' %}">
+                                <i class="bi bi-briefcase"></i> Портфолио
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'achievements' %}">
+                            <i class="bi bi-trophy"></i> Достижения
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'activity_log' %}">
+                            <i class="bi bi-activity"></i> Активность
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'verification' %}">
+                            <i class="bi bi-shield-check"></i> Верификация
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'notifications' %}">
+                                <i class="bi bi-bell"></i>
+                                {% if unread_notifications_count %}
+                                    <span class="badge">{{ unread_notifications_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{% url 'settings' %}">Настройки</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Выйти</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Войти</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} pixel-border">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

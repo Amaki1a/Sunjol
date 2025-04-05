@@ -1,0 +1,130 @@
+{% extends 'startups/base.html' %}
+
+{% block title %}Верификация пользователя{% endblock %}
+
+{% block extra_css %}
+<style>
+    .verification-status {
+        padding: 1rem;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .verification-steps {
+        margin-top: 2rem;
+    }
+    .step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Верификация пользователя</h2>
+    
+    {% if user.verification %}
+    <div class="verification-status status-{{ user.verification.verification_status }}">
+        <h4>Статус верификации: {{ user.verification.get_verification_status_display }}</h4>
+        {% if user.verification.verification_status == 'pending' %}
+            <p>Ваши документы на проверке. Обычно это занимает 1-2 рабочих дня.</p>
+        {% elif user.verification.verification_status == 'approved' %}
+            <p>Поздравляем! Ваш аккаунт верифицирован.</p>
+        {% elif user.verification.verification_status == 'rejected' %}
+            <p>К сожалению, ваша верификация была отклонена. Пожалуйста, проверьте документы и попробуйте снова.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="verification-steps">
+        <h3>Процесс верификации</h3>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                <h5>Загрузите документы</h5>
+                <p>Подготовьте сканы или фотографии документов, удостоверяющих личность</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                <h5>Проверка документов</h5>
+                <p>Наши модераторы проверят предоставленные документы</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                <h5>Получение статуса</h5>
+                <p>Вы получите уведомление о результате проверки</p>
+            </div>
+        </div>
+    </div>
+
+    {% if not user.verification or user.verification.verification_status == 'rejected' %}
+    <form id="verificationForm" class="mt-4">
+        <div class="form-group">
+            <label for="verification_documents">Загрузите документы для верификации</label>
+            <input type="file" class="form-control-file" id="verification_documents" name="verification_documents" required>
+            <small class="form-text text-muted">
+                Поддерживаемые форматы: PDF, JPG, JPEG, PNG. Максимальный размер файла: 5MB
+            </small>
+        </div>
+        <button type="submit" class="btn btn-primary">Отправить на проверку</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('verificationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('/verification/submit/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Документы успешно отправлены на проверку!');
+                location.reload();
+            } else {
+                alert('Ошибка при отправке документов');
+            }
+        });
+    });
+</script>
+{% endblock %} 

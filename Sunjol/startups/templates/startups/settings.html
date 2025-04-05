@@ -1,0 +1,99 @@
+{% extends 'startups/base.html' %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="neon-text mb-4">Настройки</h2>
+                    
+                    <!-- Настройки аккаунта -->
+                    <div class="mb-5">
+                        <h3 class="purple-neon-text mb-3">Аккаунт</h3>
+                        <a href="{% url 'update_account' %}" class="btn">
+                            <i class="bi bi-person"></i> Редактировать профиль
+                        </a>
+                        <a href="{% url 'change_password' %}" class="btn">
+                            <i class="bi bi-key"></i> Изменить пароль
+                        </a>
+                    </div>
+                    
+                    <!-- Настройки уведомлений -->
+                    <div class="mb-5">
+                        <h3 class="purple-neon-text mb-3">Уведомления</h3>
+                        <form method="post" action="{% url 'update_notifications' %}" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" {% if user.investor.email_notifications %}checked{% endif %}>
+                                    <label class="form-check-label neon-text" for="email_notifications">
+                                        Получать уведомления по email
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="investment_alerts" name="investment_alerts" {% if user.investor.investment_alerts %}checked{% endif %}>
+                                    <label class="form-check-label neon-text" for="investment_alerts">
+                                        Уведомления о новых инвестициях
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="startup_updates" name="startup_updates" {% if user.investor.startup_updates %}checked{% endif %}>
+                                    <label class="form-check-label neon-text" for="startup_updates">
+                                        Обновления о стартапах
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn">
+                                <i class="bi bi-bell"></i> Сохранить настройки уведомлений
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Удаление аккаунта -->
+                    <div class="mb-4">
+                        <h3 class="purple-neon-text mb-3">Опасная зона</h3>
+                        <div class="alert pixel-border">
+                            <h4 class="neon-text">Удаление аккаунта</h4>
+                            <p>Это действие нельзя отменить. Все ваши данные будут удалены.</p>
+                            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                <i class="bi bi-exclamation-triangle"></i> Удалить аккаунт
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title neon-text">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить свой аккаунт? Это действие нельзя отменить.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form method="post" action="{% url 'delete_account' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Удалить аккаунт
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

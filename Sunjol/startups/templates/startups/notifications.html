@@ -1,0 +1,124 @@
+{% extends 'startups/base.html' %}
+
+{% block title %}Уведомления - Sunjol{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notification-item {
+        background: var(--gradient-2);
+        border: 2px solid var(--neon-blue);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .notification-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 0 20px var(--neon-blue);
+    }
+    
+    .notification-item.unread {
+        border-left: 5px solid var(--neon-blue);
+    }
+    
+    .notification-time {
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    
+    .notification-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .mark-all-read {
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="neon-text mb-4">
+                <i class="bi bi-bell"></i> Уведомления
+            </h2>
+            
+            <button class="btn mark-all-read" id="mark-all-read">
+                <i class="bi bi-check-all"></i> Отметить все как прочитанные
+            </button>
+            
+            <div id="notifications-list">
+                {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %}" 
+                     data-notification-id="{{ notification.id }}">
+                    <div class="notification-content">
+                        {{ notification.message }}
+                    </div>
+                    <div class="notification-time">
+                        {{ notification.created_at|date:"d.m.Y H:i" }}
+                    </div>
+                    <div class="notification-actions">
+                        {% if notification.link %}
+                        <a href="{{ notification.link }}" class="btn btn-sm">
+                            <i class="bi bi-arrow-right"></i> Перейти
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-sm mark-read" data-notification-id="{{ notification.id }}">
+                            <i class="bi bi-check"></i> Отметить как прочитанное
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert">
+                    <i class="bi bi-info-circle"></i> У вас пока нет уведомлений
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Отметить все уведомления как прочитанные
+    document.getElementById('mark-all-read').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/notifications/mark-all-read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            
+            if (response.ok) {
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    item.classList.remove('unread');
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+    
+    // Отметить отдельное уведомление как прочитанное
+    document.querySelectorAll('.mark-read').forEach(button => {
+        button.addEventListener('click', async () => {
+            const notificationId = button.dataset.notificationId;
+            try {
+                const response = await fetch(`/notifications/${notificationId}/mark-read/`);
+                if (response.ok) {
+                    const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                    notificationItem.classList.remove('unread');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+</script>
+{% endblock %} 

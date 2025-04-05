@@ -1,0 +1,69 @@
+{% extends 'startups/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="neon-text">All Startups</h1>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="col-md-4 text-end">
+            <a href="{% url 'create_startup' %}" class="btn">
+                <i class="bi bi-plus-circle"></i> Add Your Startup
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for startup in startups %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title neon-text">
+                        <a href="{% url 'startup_detail' startup.id %}" class="text-decoration-none">
+                            {{ startup.name }}
+                        </a>
+                    </h5>
+                    <h6 class="card-subtitle mb-2 purple-neon-text">
+                        {{ startup.get_industry_display }} • {{ startup.get_stage_display }}
+                    </h6>
+                    <p class="card-text text-truncate">{{ startup.description }}</p>
+                    
+                    <div class="progress mb-3" style="height: 10px; background-color: var(--space-blue);">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ startup.funding_percentage }}%; background-color: var(--neon-blue);" 
+                             aria-valuenow="{{ startup.funding_percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <small class="purple-neon-text">
+                            ${{ startup.current_funding }} raised
+                        </small>
+                        <small class="purple-neon-text">
+                            ${{ startup.funding_goal }} goal
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'startup_detail' startup.id %}" class="btn btn-sm">View Details</a>
+                    {% if user.is_authenticated and user == startup.founder %}
+                    <a href="#" class="btn btn-sm">Edit</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert pixel-border">
+                <i class="bi bi-info-circle"></i> No startups available yet.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

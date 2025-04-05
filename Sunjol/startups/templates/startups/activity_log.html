@@ -1,0 +1,117 @@
+{% extends 'startups/base.html' %}
+
+{% block title %}Журнал активности{% endblock %}
+
+{% block extra_css %}
+<style>
+    .activity-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .activity-icon {
+        font-size: 1.5rem;
+        margin-right: 15px;
+        color: #00ff9d;
+    }
+    .activity-content {
+        flex-grow: 1;
+    }
+    .activity-time {
+        color: #a8a8a8;
+        font-size: 0.9rem;
+    }
+    .activity-type {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        margin-right: 10px;
+    }
+    .type-login {
+        background-color: #4d94ff;
+        color: white;
+    }
+    .type-startup_view {
+        background-color: #00ff9d;
+        color: black;
+    }
+    .type-investment {
+        background-color: #ffd700;
+        color: black;
+    }
+    .type-comment {
+        background-color: #ff4d4d;
+        color: white;
+    }
+    .type-rating {
+        background-color: #ff9d00;
+        color: white;
+    }
+    .type-message {
+        background-color: #9d4dff;
+        color: white;
+    }
+    .type-document {
+        background-color: #4dffff;
+        color: black;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Журнал активности</h2>
+    
+    <div class="activity-card">
+        {% for activity in activities %}
+        <div class="activity-item">
+            <div class="activity-icon">
+                {% if activity.activity_type == 'login' %}
+                    <i class="bi bi-box-arrow-in-right"></i>
+                {% elif activity.activity_type == 'startup_view' %}
+                    <i class="bi bi-eye"></i>
+                {% elif activity.activity_type == 'investment' %}
+                    <i class="bi bi-cash-coin"></i>
+                {% elif activity.activity_type == 'comment' %}
+                    <i class="bi bi-chat-dots"></i>
+                {% elif activity.activity_type == 'rating' %}
+                    <i class="bi bi-star"></i>
+                {% elif activity.activity_type == 'message' %}
+                    <i class="bi bi-envelope"></i>
+                {% elif activity.activity_type == 'document' %}
+                    <i class="bi bi-file-earmark"></i>
+                {% endif %}
+            </div>
+            <div class="activity-content">
+                <div>
+                    <span class="activity-type type-{{ activity.activity_type }}">
+                        {{ activity.get_activity_type_display }}
+                    </span>
+                    {{ activity.description }}
+                </div>
+                <div class="activity-time">
+                    {{ activity.timestamp|date:"d.m.Y H:i" }}
+                    {% if activity.ip_address %}
+                        · IP: {{ activity.ip_address }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center p-4">
+            <h4>Нет записей активности</h4>
+            <p>Здесь будет отображаться ваша активность на платформе</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

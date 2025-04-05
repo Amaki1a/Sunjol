@@ -1,0 +1,225 @@
+{% extends 'startups/base.html' %}
+
+{% block title %}Аналитика - {{ startup.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css">
+<style>
+    .analytics-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #00ff9d;
+    }
+    .metric-label {
+        color: #a8a8a8;
+        font-size: 0.9rem;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 30px;
+    }
+    .trend-up {
+        color: #00ff9d;
+    }
+    .trend-down {
+        color: #ff4d4d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Аналитика стартапа {{ startup.name }}</h2>
+    
+    <div class="row mt-4">
+        <!-- Основные метрики -->
+        <div class="col-md-3">
+            <div class="analytics-card">
+                <div class="metric-label">Просмотры</div>
+                <div class="metric-value">{{ analytics.views_count }}</div>
+                <div class="trend-up">
+                    <i class="bi bi-arrow-up"></i> +{{ analytics.views_count|add:"-100" }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="analytics-card">
+                <div class="metric-label">Уникальные посетители</div>
+                <div class="metric-value">{{ analytics.unique_visitors }}</div>
+                <div class="trend-up">
+                    <i class="bi bi-arrow-up"></i> +{{ analytics.unique_visitors|add:"-50" }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="analytics-card">
+                <div class="metric-label">Просмотры инвесторов</div>
+                <div class="metric-value">{{ analytics.investor_views }}</div>
+                <div class="trend-up">
+                    <i class="bi bi-arrow-up"></i> +{{ analytics.investor_views|add:"-20" }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="analytics-card">
+                <div class="metric-label">Запросы на контакт</div>
+                <div class="metric-value">{{ analytics.contact_requests }}</div>
+                <div class="trend-up">
+                    <i class="bi bi-arrow-up"></i> +{{ analytics.contact_requests|add:"-5" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Графики -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="analytics-card">
+                <h4>Выручка и расходы</h4>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="analytics-card">
+                <h4>Пользователи</h4>
+                <div class="chart-container">
+                    <canvas id="usersChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма обновления метрик -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="analytics-card">
+                <h4>Обновить метрики</h4>
+                <form id="metricsForm" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="revenue" class="form-label">Выручка</label>
+                        <input type="number" class="form-control" id="revenue" name="revenue" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="expenses" class="form-label">Расходы</label>
+                        <input type="number" class="form-control" id="expenses" name="expenses" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="customers" class="form-label">Клиенты</label>
+                        <input type="number" class="form-control" id="customers" name="customers" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="active_users" class="form-label">Активные пользователи</label>
+                        <input type="number" class="form-control" id="active_users" name="active_users" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="churn_rate" class="form-label">Отток (%)</label>
+                        <input type="number" class="form-control" id="churn_rate" name="churn_rate" step="0.01" required>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Обновить метрики</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+    // Данные для графиков
+    const chartData = {{ chart_data|safe }};
+    
+    // График выручки и расходов
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: chartData.dates,
+            datasets: [{
+                label: 'Выручка',
+                data: chartData.revenues,
+                borderColor: '#00ff9d',
+                tension: 0.4
+            }, {
+                label: 'Расходы',
+                data: chartData.expenses,
+                borderColor: '#ff4d4d',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // График пользователей
+    const usersCtx = document.getElementById('usersChart').getContext('2d');
+    new Chart(usersCtx, {
+        type: 'line',
+        data: {
+            labels: chartData.dates,
+            datasets: [{
+                label: 'Клиенты',
+                data: chartData.customers,
+                borderColor: '#00ff9d',
+                tension: 0.4
+            }, {
+                label: 'Активные пользователи',
+                data: chartData.active_users,
+                borderColor: '#4d94ff',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Обработка формы
+    document.getElementById('metricsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch(`/startup/{{ startup.id }}/metrics/update/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Метрики успешно обновлены!');
+                location.reload();
+            } else {
+                alert('Ошибка при обновлении метрик');
+            }
+        });
+    });
+</script>
+{% endblock %} 
